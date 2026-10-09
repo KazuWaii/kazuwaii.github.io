@@ -1,0 +1,1132 @@
+---
+import { Image } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from './Icon.astro';
+import photo from '../assets/photo.jpg';
+import {
+  site,
+  ui,
+  projects,
+  otherProjects,
+  experience,
+  education,
+  skills,
+  languages,
+  type Lang,
+} from '../data/content';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = ui[lang];
+const homeHref = lang === 'fr' ? '/' : '/en/';
+const navItems = [
+  ['projects', t.nav.projects],
+  ['experience', t.nav.experience],
+  ['education', t.nav.education],
+  ['skills', t.nav.skills],
+  ['contact', t.nav.contact],
+];
+const external = { target: '_blank', rel: 'noopener noreferrer' };
+---
+
+<BaseLayout lang={lang}>
+  <a class="skip-link" href="#main">{t.skipLink}</a>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href={homeHref} class="brand">{site.name}</a>
+      <nav aria-label={lang === 'fr' ? 'Sections' : 'Sections'}>
+        <ul class="nav-links">
+          {navItems.map(([id, label]) => <li><a href={`#${id}`}>{label}</a></li>)}
+        </ul>
+      </nav>
+      <div class="header-actions">
+        <a
+          class="header-button lang-switch"
+          href={t.otherLang.href}
+          hreflang={lang === 'fr' ? 'en' : 'fr'}
+          aria-label={t.otherLang.name}
+          title={t.otherLang.name}>{t.otherLang.label}</a
+        >
+        <button
+          type="button"
+          class="header-button theme-toggle"
+          data-label-dark={t.theme.toDark}
+          data-label-light={t.theme.toLight}
+          aria-label={t.theme.toDark}
+          title={t.theme.toDark}
+        >
+          <span class="show-light"><Icon name="moon" /></span>
+          <span class="show-dark"><Icon name="sun" /></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="hero container">
+      <div class="hero-text">
+        <p class="available"><span class="dot" aria-hidden="true"></span>{t.hero.available}</p>
+        <h1>{site.name}</h1>
+        <p class="role">{t.hero.role}</p>
+        <p class="tagline">{t.hero.tagline}</p>
+        <ul class="hero-meta">
+          {t.hero.meta.map((item, i) => <li><Icon name={i === 0 ? 'book' : 'pin'} size={17} />{item}</li>)}
+        </ul>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#projects">{t.hero.projectsButton}<Icon name="arrowDown" /></a>
+          <a class="btn btn-secondary" href={site.cv[lang]} download><Icon name="download" />{t.hero.cvButton}</a>
+        </div>
+        <ul class="hero-links">
+          <li><a href={site.github} {...external}><Icon name="github" />GitHub</a></li>
+          <li><a href={site.linkedin} {...external}><Icon name="linkedin" />LinkedIn</a></li>
+          <li><a href={`mailto:${site.email}`}><Icon name="mail" />{site.email}</a></li>
+        </ul>
+      </div>
+      <div class="hero-photo">
+        <Image
+          src={photo}
+          alt={lang === 'fr' ? `Portrait de ${site.name}` : `Portrait of ${site.name}`}
+          widths={[240, 360, 480, 720]}
+          sizes="(max-width: 760px) 180px, 360px"
+          loading="eager"
+          fetchpriority="high"
+        />
+      </div>
+    </section>
+
+    <section class="section about" aria-labelledby="about-title">
+      <div class="container">
+        <h2 id="about-title" class="section-title">{t.about.title}</h2>
+        <div class="about-text">
+          {t.about.paragraphs.map((p) => <p>{p}</p>)}
+        </div>
+      </div>
+    </section>
+
+    <section id="projects" class="section" aria-labelledby="projects-title">
+      <div class="container">
+        <h2 id="projects-title" class="section-title">{t.projects.title}</h2>
+        <p class="section-intro muted">{t.projects.intro}</p>
+
+        <div class="project-list">
+          {
+            projects.map((project) => {
+              const text = project.text[lang];
+              const flow = project.flow?.[lang];
+              return (
+                <article class="project" id={project.id}>
+                  {project.image && (
+                    <a
+                      class="project-media"
+                      href={project.demo ?? project.code}
+                      {...external}
+                      tabindex="-1"
+                      aria-hidden="true"
+                      data-embed={project.embed}
+                      data-title={text.title}
+                      data-sleeps={project.embed?.includes('streamlit.app') ? '' : undefined}
+                    >
+                      <Image src={project.image} alt="" widths={[480, 720, 960]} sizes="(max-width: 860px) 100vw, 440px" />
+                    </a>
+                  )}
+                  {flow && (
+                    <div class="project-media flow">
+                      <ol>
+                        {flow.map((step) => <li>{step}</li>)}
+                      </ol>
+                    </div>
+                  )}
+                  <div class="project-body">
+                    <div class="project-head">
+                      <h3>{text.title}</h3>
+                      <span class="year muted">{project.year}</span>
+                    </div>
+                    {text.note && <p class="project-note muted">{text.note}</p>}
+                    <ul class="tags" aria-label="Stack">
+                      {project.stack.map((s) => <li>{s}</li>)}
+                    </ul>
+                    {text.summary && <p class="project-summary">{text.summary}</p>}
+                    <ul class="bullets">
+                      {text.bullets.map((b) => <li>{b}</li>)}
+                    </ul>
+                    <div class="project-links">
+                      {project.demo && (
+                        <a
+                          class="btn btn-primary btn-small"
+                          href={project.demo}
+                          {...external}
+                          data-embed={project.embed}
+                          data-title={text.title}
+                          data-sleeps={project.embed?.includes('streamlit.app') ? '' : undefined}
+                        >
+                          <Icon name="play" size={16} />
+                          {t.projects.tryHere}
+                        </a>
+                      )}
+                      {project.voice && (
+                        <button
+                          type="button"
+                          class="btn btn-primary btn-small"
+                          data-voice-agent={project.voice.agentId}
+                          data-voice-health={project.voice.healthUrl}
+                        >
+                          <Icon name="mic" size={16} />
+                          {t.projects.tryHere}
+                        </button>
+                      )}
+                      {project.demo && (
+                        <a class="btn btn-secondary btn-small" href={project.demo} {...external}>
+                          {t.projects.newTab}
+                          <Icon name="external" size={16} />
+                        </a>
+                      )}
+                      <a class="btn btn-secondary btn-small" href={project.code} {...external}>
+                        <Icon name="github" size={16} />
+                        {t.projects.code}
+                      </a>
+                    </div>
+                    {project.voice && (
+                      <div
+                        class="voice-panel"
+                        hidden
+                        data-warming={t.projects.voice.warming}
+                        data-ready={t.projects.voice.ready}
+                        data-error={t.projects.voice.error}
+                      >
+                        <p class="voice-status" role="status" aria-live="polite"></p>
+                        <p class="voice-hint muted">{t.projects.voice.hint}</p>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              );
+            })
+          }
+        </div>
+
+        <h3 class="others-title">{t.projects.others}</h3>
+        <ul class="others">
+          {
+            otherProjects.map((p) => (
+              <li>
+                <div class="project-head">
+                  <h4>{p.text[lang].title}</h4>
+                  <span class="year muted">{p.year}</span>
+                </div>
+                <p class="muted">{p.text[lang].description}</p>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section id="experience" class="section" aria-labelledby="experience-title">
+      <div class="container">
+        <h2 id="experience-title" class="section-title">{t.experience.title}</h2>
+        {
+          experience.map((e) => (
+            <article class="entry">
+              <div class="project-head">
+                <h3>{e.text[lang].title}</h3>
+                <span class="year muted">{e.period[lang]}</span>
+              </div>
+              <p class="entry-place muted">{e.text[lang].place}</p>
+              <ul class="bullets">
+                {e.text[lang].bullets.map((b) => <li>{b}</li>)}
+              </ul>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+
+    <section id="education" class="section" aria-labelledby="education-title">
+      <div class="container">
+        <h2 id="education-title" class="section-title">{t.education.title}</h2>
+        <div class="education-grid">
+          {
+            education.map((e) => (
+              <article class="entry">
+                <div class="project-head">
+                  <h3>{e.school}</h3>
+                  <span class="year muted">{e.period[lang]}</span>
+                </div>
+                <p>{e.text[lang].degree}</p>
+                <p class="entry-place muted">{e.text[lang].place}</p>
+              </article>
+            ))
+          }
+        </div>
+      </div>
+    </section>
+
+    <section id="skills" class="section" aria-labelledby="skills-title">
+      <div class="container">
+        <h2 id="skills-title" class="section-title">{t.skills.title}</h2>
+        <dl class="skills-grid">
+          {
+            skills.map((s) => (
+              <div class="skill">
+                <dt>{s[lang].label}</dt>
+                <dd class="muted">{s[lang].items}</dd>
+              </div>
+            ))
+          }
+        </dl>
+        <h3 class="others-title">{t.skills.languages}</h3>
+        <ul class="languages">
+          {
+            languages[lang].map((l) => (
+              <li>
+                <strong>{l.name}</strong> <span class="muted">· {l.level}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section id="contact" class="section" aria-labelledby="contact-title">
+      <div class="container">
+        <div class="contact-card">
+          <h2 id="contact-title" class="section-title">{t.contact.title}</h2>
+          <p class="contact-text">{t.contact.text}</p>
+          <div class="contact-actions">
+            <a class="btn btn-primary" href={`mailto:${site.email}`}><Icon name="mail" />{t.contact.email}</a>
+            <a class="btn btn-secondary" href={site.linkedin} {...external}><Icon name="linkedin" />LinkedIn</a>
+            <a class="btn btn-secondary" href={site.github} {...external}><Icon name="github" />GitHub</a>
+          </div>
+          <p class="contact-cv">
+            <a href={site.cv.fr} download><Icon name="download" size={16} />{t.contact.cvFr}</a>
+            <a href={site.cv.en} download><Icon name="download" size={16} />{t.contact.cvEn}</a>
+          </p>
+          <p class="contact-email muted">{site.email}</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog class="demo-dialog" aria-labelledby="demo-title">
+    <div class="demo-bar">
+      <h2 id="demo-title" class="demo-title"></h2>
+      <a class="demo-newtab" href="#" {...external}>{t.projects.dialog.openInTab}<Icon name="external" size={15} /></a>
+      <button type="button" class="demo-close" aria-label={t.projects.dialog.close} title={t.projects.dialog.close}>
+        <Icon name="close" />
+      </button>
+    </div>
+    <p class="demo-sleep-hint" hidden>{t.projects.dialog.sleepHint}</p>
+    <div class="demo-frame">
+      <p class="demo-loading">{t.projects.dialog.loading}</p>
+      <iframe title="" allow="clipboard-write; fullscreen"></iframe>
+    </div>
+  </dialog>
+
+  <footer class="site-footer">
+    <div class="container footer-inner muted">
+      <span>© {new Date().getFullYear()} {site.name}</span>
+      <span>{t.footer.builtWith} · <a href={site.sourceCode} {...external}>{t.footer.source}</a></span>
+    </div>
+  </footer>
+</BaseLayout>
+
+<script>
+  // Demo window: the live app runs in an iframe, unloaded when the window closes
+  const dialog = document.querySelector<HTMLDialogElement>('.demo-dialog');
+  const frame = dialog?.querySelector('iframe');
+  const dialogTitle = dialog?.querySelector('.demo-title');
+  const newTab = dialog?.querySelector<HTMLAnchorElement>('.demo-newtab');
+  const sleepHint = dialog?.querySelector<HTMLElement>('.demo-sleep-hint');
+  if (dialog && frame && dialogTitle && newTab && sleepHint) {
+    document.querySelectorAll<HTMLAnchorElement>('a[data-embed]').forEach((link) => {
+      link.addEventListener('click', (event) => {
+        if (event.ctrlKey || event.metaKey || event.shiftKey) return;
+        event.preventDefault();
+        dialogTitle.textContent = link.dataset.title ?? '';
+        frame.title = link.dataset.title ?? '';
+        newTab.href = link.href;
+        // Streamlit Cloud apps go to sleep when unused and can only be woken from their own page
+        sleepHint.hidden = link.dataset.sleeps === undefined;
+        dialog.classList.remove('loaded');
+        frame.src = link.dataset.embed ?? link.href;
+        dialog.showModal();
+      });
+    });
+    frame.addEventListener('load', () => {
+      if (frame.getAttribute('src') !== 'about:blank') dialog.classList.add('loaded');
+    });
+    dialog.querySelector('.demo-close')?.addEventListener('click', () => dialog.close());
+    // A click on the dimmed backdrop lands on the dialog element itself
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) dialog.close();
+    });
+    dialog.addEventListener('close', () => frame.setAttribute('src', 'about:blank'));
+  }
+
+  // Voice agent: wake the backend first (a call fails if its first message waits on a cold start),
+  // then load the ElevenLabs widget, which adds a call button at the bottom right of the page.
+  const WIDGET_SCRIPT = 'https://unpkg.com/@elevenlabs/convai-widget-embed@0.18.2';
+  document.querySelectorAll<HTMLButtonElement>('[data-voice-agent]').forEach((voiceButton) => {
+    const panel = voiceButton.closest('.project')?.querySelector<HTMLElement>('.voice-panel');
+    const status = panel?.querySelector('.voice-status');
+    if (!panel || !status) return;
+    voiceButton.addEventListener('click', async () => {
+      panel.hidden = false;
+      panel.classList.remove('ready');
+      status.textContent = panel.dataset.warming ?? '';
+      voiceButton.disabled = true;
+      try {
+        // no-cors: only the wake-up matters, and it then works from any origin (local preview included).
+        // The request resolves once Azure has started the container, and rejects on a network error or timeout.
+        await fetch(voiceButton.dataset.voiceHealth ?? '', { mode: 'no-cors', signal: AbortSignal.timeout(120_000) });
+        if (!document.querySelector('elevenlabs-convai')) {
+          const widget = document.createElement('elevenlabs-convai');
+          widget.setAttribute('agent-id', voiceButton.dataset.voiceAgent ?? '');
+          document.body.append(widget);
+          const script = document.createElement('script');
+          script.src = WIDGET_SCRIPT;
+          script.async = true;
+          document.body.append(script);
+        }
+        panel.classList.add('ready');
+        status.textContent = panel.dataset.ready ?? '';
+      } catch {
+        status.textContent = panel.dataset.error ?? '';
+        voiceButton.disabled = false;
+      }
+    });
+  });
+
+  const button = document.querySelector<HTMLButtonElement>('.theme-toggle');
+  if (button) {
+    const root = document.documentElement;
+    const sync = () => {
+      const label = root.dataset.theme === 'dark' ? button.dataset.labelLight : button.dataset.labelDark;
+      button.setAttribute('aria-label', label ?? '');
+      button.title = label ?? '';
+    };
+    button.addEventListener('click', () => {
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark';
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem('theme', next);
+      } catch {}
+      sync();
+    });
+    sync();
+  }
+</script>
+
+<style>
+  /* Header */
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    height: 4rem;
+  }
+
+  .brand {
+    font-weight: 700;
+    color: var(--text);
+    text-decoration: none;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+
+  nav {
+    margin-left: auto;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 1.4rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.93rem;
+    font-weight: 500;
+  }
+
+  .nav-links a:hover {
+    color: var(--text);
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .header-button {
+    display: inline-grid;
+    place-items: center;
+    min-width: 2.4rem;
+    height: 2.4rem;
+    padding: 0 0.55rem;
+    border-radius: 9px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 0.85rem;
+    font-weight: 650;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .header-button:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .show-dark,
+  :global([data-theme='dark']) .show-light {
+    display: none;
+  }
+
+  :global([data-theme='dark']) .show-dark {
+    display: inline-flex;
+  }
+
+  .show-light {
+    display: inline-flex;
+  }
+
+  @media (max-width: 860px) {
+    nav {
+      display: none;
+    }
+    .header-actions {
+      margin-left: auto;
+    }
+  }
+
+  /* Hero */
+  .hero {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 3rem;
+    padding-top: 4.5rem;
+    padding-bottom: 4.5rem;
+  }
+
+  .available {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--available);
+    background: color-mix(in srgb, var(--available) 10%, transparent);
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    margin-bottom: 1.25rem;
+  }
+
+  .dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .hero h1 {
+    font-size: clamp(2.5rem, 6vw, 3.75rem);
+    font-weight: 800;
+    letter-spacing: -0.035em;
+  }
+
+  .role {
+    margin-top: 0.6rem;
+    font-size: clamp(1.15rem, 2.4vw, 1.45rem);
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: -0.01em;
+  }
+
+  .tagline {
+    margin-top: 1rem;
+    font-size: 1.15rem;
+    max-width: 34rem;
+  }
+
+  .hero-meta {
+    list-style: none;
+    padding: 0;
+    margin: 1.25rem 0 0;
+    display: grid;
+    gap: 0.4rem;
+    color: var(--muted);
+    font-size: 0.95rem;
+  }
+
+  .hero-meta li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.55rem;
+  }
+
+  .hero-meta .icon {
+    margin-top: 0.2rem;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 2rem;
+  }
+
+  .hero-links {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.4rem;
+    font-size: 0.95rem;
+  }
+
+  .hero-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .hero-links a:hover {
+    color: var(--accent);
+  }
+
+  .hero-photo {
+    width: 340px;
+    aspect-ratio: 1;
+    border-radius: 50%;
+    padding: 8px;
+    background: linear-gradient(140deg, var(--accent), color-mix(in srgb, var(--accent) 25%, var(--surface)));
+    box-shadow: var(--shadow);
+  }
+
+  .hero-photo img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #fff;
+  }
+
+  @media (max-width: 760px) {
+    .hero {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+      padding-top: 2.5rem;
+      padding-bottom: 3rem;
+    }
+    .hero-photo {
+      width: 168px;
+      order: -1;
+      padding: 5px;
+    }
+  }
+
+  /* About */
+  .about {
+    padding-top: 3.5rem;
+  }
+
+  .about-text {
+    display: grid;
+    gap: 1rem;
+    max-width: 46rem;
+    font-size: 1.075rem;
+  }
+
+  /* Projects */
+  .section-intro {
+    margin-top: -1.25rem;
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+  }
+
+  .project-list {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  .project {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    gap: 2rem;
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  .project:not(:has(.project-media)) {
+    grid-template-columns: 1fr;
+  }
+
+  .project-media {
+    display: block;
+    align-self: start;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+  }
+
+  .project-media img {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    object-position: top left;
+    transition: transform 0.3s ease;
+  }
+
+  a.project-media:hover img {
+    transform: scale(1.02);
+  }
+
+  .flow {
+    display: grid;
+    place-items: center;
+    min-height: 100%;
+    padding: 1.5rem 1rem;
+  }
+
+  .flow ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    justify-items: center;
+    gap: 1.35rem;
+  }
+
+  .flow li {
+    position: relative;
+    padding: 0.35rem 0.9rem;
+    border-radius: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .flow li:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 0.3rem);
+    width: 1px;
+    height: 0.75rem;
+    background: var(--muted);
+  }
+
+  .flow li:last-child {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: transparent;
+  }
+
+  .project-body {
+    display: grid;
+    align-content: start;
+    gap: 0.9rem;
+  }
+
+  .project-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  .project-head h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .year {
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+
+  .project-note {
+    margin-top: -0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .project-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 0.4rem;
+  }
+
+  .btn-small {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.875rem;
+  }
+
+  @media (max-width: 860px) {
+    .project {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+      padding: 1.1rem;
+    }
+  }
+
+  .others-title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin: 3rem 0 1.25rem;
+  }
+
+  .others {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .others li {
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+
+  .others h4 {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.35;
+  }
+
+  .others p {
+    margin-top: 0.5rem;
+    font-size: 0.92rem;
+  }
+
+  @media (max-width: 860px) {
+    .others {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Experience & education */
+  .entry {
+    display: grid;
+    gap: 0.4rem;
+    padding: 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+  }
+
+  .entry h3 {
+    font-size: 1.15rem;
+  }
+
+  .entry-place {
+    font-size: 0.95rem;
+  }
+
+  .entry .bullets {
+    margin-top: 0.6rem;
+  }
+
+  .education-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  @media (max-width: 760px) {
+    .education-grid {
+      grid-template-columns: 1fr;
+    }
+    .project-head {
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+  }
+
+  /* Skills */
+  .skills-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+    margin: 0;
+  }
+
+  .skill {
+    padding: 1.1rem 1.2rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+
+  .skill dt {
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+
+  .skill dd {
+    margin: 0;
+    font-size: 0.93rem;
+  }
+
+  @media (max-width: 860px) {
+    .skills-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 560px) {
+    .skills-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .languages {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2rem;
+  }
+
+  /* Contact */
+  .contact-card {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    border-radius: 20px;
+    background: var(--accent-soft);
+  }
+
+  .contact-card .section-title {
+    margin-bottom: 0.75rem;
+  }
+
+  .contact-text {
+    max-width: 36rem;
+    margin: 0 auto;
+    font-size: 1.1rem;
+  }
+
+  .contact-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+  }
+
+  .contact-cv {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem 1.5rem;
+    margin-top: 1.5rem;
+    font-weight: 550;
+  }
+
+  .contact-cv a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .contact-email {
+    margin-top: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .voice-panel {
+    padding: 0.8rem 1rem;
+    border-radius: 10px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    font-size: 0.92rem;
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .voice-panel[hidden] {
+    display: none;
+  }
+
+  .voice-panel.ready .voice-status {
+    color: var(--available);
+    font-weight: 600;
+  }
+
+  /* Demo window */
+  .demo-dialog {
+    width: min(1280px, 96vw);
+    height: min(900px, 92vh);
+    max-width: none;
+    max-height: none;
+    padding: 0;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: var(--surface);
+    color: var(--text);
+    overflow: hidden;
+    box-shadow: 0 24px 64px rgb(0 0 0 / 0.35);
+  }
+
+  .demo-dialog[open] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .demo-dialog::backdrop {
+    background: rgb(8 12 18 / 0.6);
+  }
+
+  :global(body:has(.demo-dialog[open])) {
+    overflow: hidden;
+  }
+
+  .demo-bar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.55rem 0.6rem 0.55rem 1.1rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .demo-title {
+    flex: 1;
+    min-width: 0;
+    font-size: 1rem;
+    font-weight: 700;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .demo-newtab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.9rem;
+    font-weight: 550;
+    white-space: nowrap;
+  }
+
+  .demo-close {
+    display: inline-grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .demo-close:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .demo-frame {
+    position: relative;
+    flex: 1;
+    background: var(--surface-2);
+  }
+
+  .demo-frame iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .demo-loading {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    padding: 2rem;
+    text-align: center;
+    color: var(--muted);
+    background: var(--surface-2);
+  }
+
+  .demo-dialog.loaded .demo-loading {
+    display: none;
+  }
+
+  .demo-sleep-hint {
+    margin: 0;
+    padding: 0.45rem 1.1rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .demo-sleep-hint[hidden] {
+    display: none;
+  }
+
+  @media (max-width: 600px) {
+    .demo-dialog {
+      width: 100vw;
+      height: 100dvh;
+      border: 0;
+      border-radius: 0;
+    }
+    .demo-newtab {
+      font-size: 0;
+      gap: 0;
+    }
+  }
+
+  /* Footer */
+  .site-footer {
+    padding: 2rem 0 2.5rem;
+    font-size: 0.875rem;
+  }
+
+  .footer-inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.5rem 1.5rem;
+  }
+</style>
