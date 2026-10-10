@@ -248,7 +248,7 @@ const projectsText: Project[] = [
           'Le même pipeline RAG, construit trois fois sur un index FAISS commun, pour comparer les frameworks à données égales.',
         bullets: [
           'Les réglages par défaut comptent : LlamaIndex encode aussi les métadonnées, ce qui fait chuter la similarité du bon enregistrement de 0,575 à 0,396.',
-          '20 questions revues à la main et notées par un LLM juge : 17/20 pour LlamaIndex, 20/20 pour LangChain et Haystack. RAGAS en complément.',
+          '20 questions revues à la main, notées par un LLM juge (17/20 pour LlamaIndex, 20/20 pour LangChain et Haystack) et par RAGAS (exactitude des réponses : 0,80, 0,91 et 0,91). Les trois erreurs viennent de LlamaIndex.',
           'Filtrage par rôle dans chaque framework : filtres natifs pour LangChain et Haystack, postprocesseur sur mesure pour LlamaIndex.',
         ],
       },
@@ -258,7 +258,7 @@ const projectsText: Project[] = [
         summary: 'The same RAG pipeline built three times on one shared FAISS index, to compare frameworks on equal data.',
         bullets: [
           "Defaults matter: LlamaIndex also embeds metadata by default, which cuts the correct record's similarity from 0.575 to 0.396.",
-          '20 hand-reviewed questions graded by an LLM judge: 17/20 for LlamaIndex, 20/20 for LangChain and Haystack, plus RAGAS.',
+          '20 hand-reviewed questions graded by an LLM judge (17/20 for LlamaIndex, 20/20 for LangChain and Haystack) and by RAGAS (answer accuracy 0.80, 0.91 and 0.91). All three errors come from LlamaIndex.',
           'Role filtering in each framework: built-in filters for LangChain and Haystack, a custom postprocessor for LlamaIndex.',
         ],
       },
